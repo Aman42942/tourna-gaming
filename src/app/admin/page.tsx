@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Trophy, Users, DollarSign, Calendar, TrendingUp, Plus } from "lucide-react";
 import Link from "next/link";
-import Navbar from "@/components/ui/navbar";
+
 
 // Mock admin data
 const stats = [
@@ -66,8 +66,6 @@ export default function AdminDashboard() {
 
     return (
         <div className="min-h-screen">
-            <Navbar />
-
             <section className="pt-24 pb-12">
                 <div className="container mx-auto px-4">
                     {/* Header */}

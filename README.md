@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Elite Gaming Tournament Platform
 
 **A world-class esports tournament platform with RGB gaming aesthetics, multi-game support, and zero infrastructure cost.**
@@ -226,3 +227,6 @@ MIT License - feel free to use for commercial projects!
 **Built with ❤️ for the gaming community**
 
 🎮 **Start your esports empire today!** 🚀
+=======
+# tourna-gaming
+>>>>>>> f1c04fad2ffdc56ec6cb18ff4d33e0389d51f76e
