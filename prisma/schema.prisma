@@ -1,0 +1,167 @@
+// This is your Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Model - Social Auth + Email/Password
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // For email/password auth (hashed)
+  
+  // Social Auth
+  accounts      Account[]
+  sessions      Session[]
+  
+  // Tournament Relations
+  teams         Team[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// Tournament Model
+model Tournament {
+  id          String   @id @default(cuid())
+  name        String
+  game        String   // valorant, pubg, bgmi, freefire
+  description String?  @db.Text
+  
+  // Pricing (Admin sets per-person fee)
+  tier        String   // low, medium, high
+  perPersonFee Int     // Fee per player in smallest currency unit (paise/cents)
+  
+  // Prize Pool
+  prizePool   Int      // Total prize money
+  
+  // Tournament Details
+  maxTeams    Int
+  minPlayers  Int      // Minimum players per team
+  maxPlayers  Int      // Maximum players per team
+  startDate   DateTime
+  endDate     DateTime
+  
+  // Status
+  status      String   @default("upcoming") // upcoming, ongoing, completed, cancelled
+  
+  // Relations
+  registrations Registration[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("tournaments")
+}
+
+// Team Model
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id])
+  
+  // Players (stored as JSON for flexibility)
+  players     Json     // Array of {name: string, gameId: string}
+  playerCount Int
+  
+  // Game Info
+  game        String
+  
+  // Relations
+  registrations Registration[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("teams")
+}
+
+// Registration Model
+model Registration {
+  id           String   @id @default(cuid())
+  tournamentId String
+  teamId       String
+  
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  team         Team       @relation(fields: [teamId], references: [id])
+  
+  // Payment
+  totalFee     Int        // Calculated: perPersonFee * playerCount
+  paymentStatus String    @default("pending") // pending, completed, failed
+  paymentId    String?    // Razorpay/Stripe payment ID
+  
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  
+  @@unique([tournamentId, teamId])
+  @@map("registrations")
+}
+
+// Payment Model (Transaction Records)
+model Payment {
+  id              String   @id @default(cuid())
+  registrationId  String?
+  
+  amount          Int
+  currency        String   @default("INR")
+  provider        String   // razorpay, stripe
+  providerPaymentId String @unique
+  
+  status          String   // success, failed, pending
+  
+  // Provider Details
+  providerData    Json?    // Store raw provider response
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("payments")
+}

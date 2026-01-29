@@ -1,0 +1,186 @@
+"use client";
+
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Mail, Lock, Chrome, Facebook, ArrowRight, AlertCircle } from "lucide-react";
+
+export default function LoginPage() {
+    const router = useRouter();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        setIsLoading(true);
+
+        try {
+            const result = await signIn("credentials", {
+                email,
+                password,
+                redirect: false,
+            });
+
+            if (result?.error) {
+                setError("Invalid email or password");
+            } else {
+                router.push("/tournaments");
+            }
+        } catch (error) {
+            setError("Something went wrong");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSocialLogin = async (provider: "google" | "facebook") => {
+        setIsLoading(true);
+        await signIn(provider, { callbackUrl: "/tournaments" });
+    };
+
+    return (
+        <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden">
+            {/* Animated Background */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+            <div className="absolute top-20 left-20 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute bottom-20 right-20 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse delay-700" />
+
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full max-w-md z-10"
+            >
+                {/* Card */}
+                <div className="glass p-8 rounded-2xl border-rgb">
+                    {/* Header */}
+                    <div className="text-center mb-8">
+                        <h1 className="text-4xl font-bold mb-2">
+                            <span className="bg-gradient-rgb bg-clip-text text-transparent">
+                                Welcome Back
+                            </span>
+                        </h1>
+                        <p className="text-muted-foreground">
+                            Sign in to compete in epic tournaments
+                        </p>
+                    </div>
+
+                    {/* Error Message */}
+                    {error && (
+                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg flex items-center gap-2 text-red-400">
+                            <AlertCircle className="w-5 h-5" />
+                            <span className="text-sm">{error}</span>
+                        </div>
+                    )}
+
+                    {/* Social Login Buttons */}
+                    <div className="space-y-3 mb-6">
+                        <button
+                            onClick={() => handleSocialLogin("google")}
+                            disabled={isLoading}
+                            className="w-full py-3 glass rounded-lg font-semibold hover:bg-white/10 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                            <Chrome className="w-5 h-5" />
+                            Continue with Google
+                        </button>
+                        <button
+                            onClick={() => handleSocialLogin("facebook")}
+                            disabled={isLoading}
+                            className="w-full py-3 glass rounded-lg font-semibold hover:bg-white/10 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                            <Facebook className="w-5 h-5" />
+                            Continue with Facebook
+                        </button>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="relative mb-6">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-border"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-2 bg-card text-muted-foreground">Or continue with email</span>
+                        </div>
+                    </div>
+
+                    {/* Email/Password Form */}
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium mb-2">
+                                Email
+                            </label>
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                                <input
+                                    id="email"
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    className="w-full pl-10 pr-4 py-3 glass rounded-lg border border-border focus:border-primary outline-none transition-colors"
+                                    placeholder="gamer@example.com"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label htmlFor="password" className="block text-sm font-medium mb-2">
+                                Password
+                            </label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                                <input
+                                    id="password"
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    className="w-full pl-10 pr-4 py-3 glass rounded-lg border border-border focus:border-primary outline-none transition-colors"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" className="rounded" />
+                                <span className="text-muted-foreground">Remember me</span>
+                            </label>
+                            <Link href="/auth/forgot-password" className="text-primary hover:underline">
+                                Forgot password?
+                            </Link>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full py-3 bg-gradient-rgb rounded-lg font-bold hover:scale-105 transition-transform duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                            {isLoading ? "Signing in..." : "Sign In"}
+                            <ArrowRight className="w-5 h-5" />
+                        </button>
+                    </form>
+
+                    {/* Sign Up Link */}
+                    <p className="mt-6 text-center text-sm text-muted-foreground">
+                        Don't have an account?{" "}
+                        <Link href="/auth/register" className="text-primary font-semibold hover:underline">
+                            Create one now
+                        </Link>
+                    </p>
+                </div>
+
+                {/* Back to Home */}
+                <div className="mt-6 text-center">
+                    <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        ← Back to Home
+                    </Link>
+                </div>
+            </motion.div>
+        </div>
+    );
+}
