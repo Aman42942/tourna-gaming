@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Trophy, Users, DollarSign, CheckCircle } from "lucide-react";
+import { Trophy, Users, CheckCircle } from "lucide-react";
 import Link from "next/link";
 
 const mockTournaments = [

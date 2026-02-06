@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
-import crypto from "crypto";
+
+interface CreateOrderPayload {
+    amount: number;
+    tournamentId?: string;
+    teamName?: string;
+}
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
@@ -10,7 +15,13 @@ const razorpay = new Razorpay({
 
 export async function POST(request: Request) {
     try {
-        const { amount, tournamentId, teamName } = await request.json();
+        const payload = (await request.json()) as CreateOrderPayload;
+
+        if (!payload || typeof payload.amount !== "number") {
+            return NextResponse.json({ message: "Invalid amount" }, { status: 400 });
+        }
+
+        const { amount, tournamentId, teamName } = payload;
 
         // Create Razorpay order
         const order = await razorpay.orders.create({
@@ -28,10 +39,11 @@ export async function POST(request: Request) {
             amount: order.amount,
             currency: order.currency,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Razorpay order creation error:", error);
+        const message = error instanceof Error ? error.message : "Failed to create order";
         return NextResponse.json(
-            { message: error.message || "Failed to create order" },
+            { message },
             { status: 500 }
         );
     }

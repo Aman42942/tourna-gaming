@@ -95,10 +95,10 @@ export default function HowItWorks() {
                         <CheckCircle className="w-16 h-16 text-neon-green mx-auto" />
                         <h3 className="text-2xl font-bold text-neon-green">Registration Successful!</h3>
                         <p className="text-lg text-muted-foreground">
-                            "You will be added soon in our group"
+                            &quot;You will be added soon in our group&quot;
                         </p>
                         <p className="text-sm text-muted-foreground">
-                            You'll receive a WhatsApp invitation with tournament details within minutes.
+                            You&apos;ll receive a WhatsApp invitation with tournament details within minutes.
                         </p>
                     </div>
                 </motion.div>

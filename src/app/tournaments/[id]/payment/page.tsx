@@ -3,13 +3,40 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { CreditCard, Wallet, Building, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { CreditCard, Wallet, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import Navbar from "@/components/ui/navbar";
 import { formatCurrency } from "@/lib/utils";
 
 declare global {
+    interface RazorpayResponse {
+        razorpay_order_id: string;
+        razorpay_payment_id: string;
+        razorpay_signature: string;
+    }
+
+    interface RazorpayOptions {
+        key: string | undefined;
+        amount: number;
+        currency: string;
+        name: string;
+        description: string;
+        order_id: string;
+        handler: (response: RazorpayResponse) => void;
+        prefill: {
+            name: string;
+        };
+        theme: {
+            color: string;
+        };
+        modal: {
+            ondismiss: () => void;
+        };
+    }
+
     interface Window {
-        Razorpay: any;
+        Razorpay: new (options: RazorpayOptions) => {
+            open: () => void;
+        };
     }
 }
 
@@ -53,14 +80,14 @@ export default function PaymentPage({ params }: { params: { id: string } }) {
             }
 
             // Initialize Razorpay
-            const options = {
+            const options: RazorpayOptions = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
                 amount: data.amount,
                 currency: "INR",
                 name: "Elite Gaming Tournaments",
                 description: `Registration: ${teamName}`,
                 order_id: data.orderId,
-                handler: function (response: any) {
+                handler: function () {
                     // Payment successful
                     setShowSuccess(true);
                     setIsProcessing(false);
@@ -80,9 +107,10 @@ export default function PaymentPage({ params }: { params: { id: string } }) {
 
             const razorpay = new window.Razorpay(options);
             razorpay.open();
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Payment error:", error);
-            alert(error.message || "Payment failed. Please try again.");
+            const message = error instanceof Error ? error.message : "Payment failed. Please try again.";
+            alert(message);
             setIsProcessing(false);
         }
     };
@@ -109,9 +137,10 @@ export default function PaymentPage({ params }: { params: { id: string } }) {
 
             // Redirect to Stripe checkout
             window.location.href = data.url;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Payment error:", error);
-            alert(error.message || "Payment failed. Please try again.");
+            const message = error instanceof Error ? error.message : "Payment failed. Please try again.";
+            alert(message);
             setIsProcessing(false);
         }
     };
@@ -155,14 +184,14 @@ export default function PaymentPage({ params }: { params: { id: string } }) {
                                 </h2>
                                 <div className="glass p-6 rounded-xl border border-neon-green/30 mb-6">
                                     <p className="text-2xl font-semibold text-neon-green mb-2">
-                                        "You will be added soon in our group"
+                                        &quot;You will be added soon in our group&quot;
                                     </p>
                                 </div>
                                 <p className="text-lg text-muted-foreground mb-2">
                                     Team: <span className="font-bold text-foreground">{teamName}</span>
                                 </p>
                                 <p className="text-muted-foreground">
-                                    You'll receive a WhatsApp invitation with tournament details within minutes.
+                                    You&apos;ll receive a WhatsApp invitation with tournament details within minutes.
                                     Check your phone for the group link!
                                 </p>
                             </motion.div>
@@ -174,7 +203,7 @@ export default function PaymentPage({ params }: { params: { id: string } }) {
                                 transition={{ delay: 0.6 }}
                                 className="border-t border-border pt-6 space-y-3"
                             >
-                                <h3 className="text-lg font-semibold mb-4">What's Next?</h3>
+                                <h3 className="text-lg font-semibold mb-4">What&apos;s Next?</h3>
                                 <div className="grid grid-cols-1 gap-3 text-sm text-left">
                                     <div className="flex items-start gap-3 glass p-4 rounded-lg">
                                         <div className="w-6 h-6 rounded-full bg-neon-green/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -183,7 +212,7 @@ export default function PaymentPage({ params }: { params: { id: string } }) {
                                         <div>
                                             <div className="font-semibold">Check WhatsApp</div>
                                             <div className="text-muted-foreground">
-                                                You'll receive an invitation link to the tournament coordination group
+                                                You&apos;ll receive an invitation link to the tournament coordination group
                                             </div>
                                         </div>
                                     </div>

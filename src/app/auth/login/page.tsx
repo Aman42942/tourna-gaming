@@ -31,7 +31,7 @@ export default function LoginPage() {
             } else {
                 router.push("/tournaments");
             }
-        } catch (error) {
+        } catch {
             setError("Something went wrong");
         } finally {
             setIsLoading(false);
@@ -167,7 +167,7 @@ export default function LoginPage() {
 
                     {/* Sign Up Link */}
                     <p className="mt-6 text-center text-sm text-muted-foreground">
-                        Don't have an account?{" "}
+                        Don&apos;t have an account?{" "}
                         <Link href="/auth/register" className="text-primary font-semibold hover:underline">
                             Create one now
                         </Link>

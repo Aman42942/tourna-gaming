@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Trophy, Users, DollarSign, Calendar, TrendingUp, Plus } from "lucide-react";
+import { Trophy, Users, DollarSign, TrendingUp, Plus } from "lucide-react";
 import Link from "next/link";
 
 
