@@ -4,9 +4,11 @@ import FacebookProvider from "next-auth/providers/facebook";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
+import type { NextAuthOptions } from "next-auth";
+import type { JWT } from "next-auth/jwt";
 
-export const authOptions = {
-    adapter: PrismaAdapter(prisma) as any,
+export const authOptions: NextAuthOptions = {
+    adapter: PrismaAdapter(prisma),
     session: {
         strategy: "jwt" as const,
     },
@@ -38,7 +40,7 @@ export const authOptions = {
                 email: { label: "Email", type: "email" },
                 password: { label: "Password", type: "password" },
             },
-            async authorize(credentials: any) {
+            async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) {
                     throw new Error("Invalid credentials");
                 }
@@ -72,16 +74,16 @@ export const authOptions = {
         }),
     ],
     callbacks: {
-        async session({ token, session }: any) {
-            if (token) {
-                session.user.id = token.id;
+        async session({ token, session }) {
+            if (session.user && token) {
+                session.user.id = token.id as string;
                 session.user.name = token.name;
                 session.user.email = token.email;
                 session.user.image = token.picture;
             }
             return session;
         },
-        async jwt({ token, user }: any) {
+        async jwt({ token, user }) {
             const dbUser = await prisma.user.findUnique({
                 where: {
                     email: token.email!,
@@ -95,12 +97,13 @@ export const authOptions = {
                 return token;
             }
 
-            return {
+            const enrichedToken: JWT = {
                 id: dbUser.id,
                 name: dbUser.name,
                 email: dbUser.email,
                 picture: dbUser.image,
             };
+            return enrichedToken;
         },
     },
 };

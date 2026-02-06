@@ -67,8 +67,9 @@ export default function RegisterPage() {
             if (result?.ok) {
                 router.push("/tournaments");
             }
-        } catch (error: any) {
-            setError(error.message || "Something went wrong");
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Something went wrong";
+            setError(message);
         } finally {
             setIsLoading(false);
         }

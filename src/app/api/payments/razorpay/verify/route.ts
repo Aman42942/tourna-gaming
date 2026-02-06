@@ -1,11 +1,23 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { prisma } from "@/lib/prisma";
+
+interface VerifyPayload {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+}
 
 export async function POST(request: Request) {
     try {
-        const body = await request.json();
+        const body = (await request.json()) as VerifyPayload;
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
+
+        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+            return NextResponse.json(
+                { message: "Missing payment verification fields" },
+                { status: 400 }
+            );
+        }
 
         // Verify signature
         const generatedSignature = crypto
@@ -30,10 +42,11 @@ export async function POST(request: Request) {
             success: true,
             message: "Payment verified successfully",
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Payment verification error:", error);
+        const message = error instanceof Error ? error.message : "Verification failed";
         return NextResponse.json(
-            { message: error.message || "Verification failed" },
+            { message },
             { status: 500 }
         );
     }

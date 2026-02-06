@@ -29,6 +29,7 @@ interface Player {
 
 export default function RegisterPage({ params }: { params: { id: string } }) {
     const router = useRouter();
+    const tournamentId = params.id;
     const [teamName, setTeamName] = useState("");
     const [players, setPlayers] = useState<Player[]>([
         { name: "", gameId: "" },
@@ -119,7 +120,7 @@ export default function RegisterPage({ params }: { params: { id: string } }) {
         // Then redirect to payment page
 
         setTimeout(() => {
-            router.push(`/tournaments/1/payment?teamName=${encodeURIComponent(teamName)}&fee=${totalFee}`);
+            router.push(`/tournaments/${tournamentId}/payment?teamName=${encodeURIComponent(teamName)}&fee=${totalFee}`);
         }, 1000);
     };
 

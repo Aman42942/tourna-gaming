@@ -27,7 +27,7 @@ export default function Hero() {
                         <div className="glass px-6 py-2 rounded-full border border-primary/50">
                             <div className="flex items-center gap-2 text-primary">
                                 <Zap className="w-4 h-4 animate-pulse" />
-                                <span className="text-sm font-semibold">World's #1 Gaming Tournament Platform</span>
+                                <span className="text-sm font-semibold">World&apos;s #1 Gaming Tournament Platform</span>
                             </div>
                         </div>
                     </motion.div>
